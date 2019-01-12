@@ -46,3 +46,52 @@ class ExpectiMaxAgent(Agent):
     def step(self):
         direction = self.search_func(self.game.board)
         return direction
+
+
+class GenerateAgent(Agent):
+
+    # counter = -1
+    buffer = []
+    stepCounter = 0
+    STEPS_TO_SAVE = 500
+
+    def __init__(self, game, display=None, steps_to_save=2000, direction='./'):
+        if game.size != 4:
+            raise ValueError(
+                "`%s` can only work with game of `size` 4." % self.__class__.__name__)
+        super().__init__(game, display)
+        from .expectimax import board_to_move
+        self.search_func = board_to_move
+        # GenerateAgent.counter += 1
+        self.fileName = direction + 'data_'
+        GenerateAgent.STEPS_TO_SAVE = steps_to_save
+
+    def step(self):
+        board = self.game.board
+        direction = self.search_func(board)
+
+        GenerateAgent.stepCounter += 1
+
+        if GenerateAgent.buffer == []:
+            GenerateAgent.buffer = np.append(np.log2(board).flatten(), direction).reshape([1, 17]).astype(np.uint8)
+        else:
+            GenerateAgent.buffer = np.append(GenerateAgent.buffer,
+                                             np.append(np.log2(board).flatten(), direction).reshape([1, 17]).astype(np.uint8),
+                                             axis=0)
+
+        if GenerateAgent.stepCounter % GenerateAgent.STEPS_TO_SAVE == 0:
+            np.savetxt(self.fileName + '{0:d}.csv'.format(int(self.stepCounter / self.STEPS_TO_SAVE)),
+                       self.buffer, fmt='%d')
+            GenerateAgent.buffer = []
+
+        return direction
+
+
+
+
+
+
+
+
+
+
