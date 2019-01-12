@@ -148,12 +148,13 @@ class TrainAgent2(TrainAgent):
 
 
 class RLAgent(Agent):
+
     def __init__(self, game, display=None, train=True, load_data=False, path=None):
         super().__init__(game, display)
         self.train = train
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.optim = torch.optim.Adam(betas=(0.5, 0.999))
-        self.creterion = torch.nn.MSELoss(size_average=True)
+        self.optimizer = torch.optim.Adam(betas=(0.5, 0.999))
+        self.criterion = torch.nn.MSELoss(size_average=True)
         self.net = nn2048()
         self.last_board = None
 
@@ -192,8 +193,7 @@ class RLAgent(Agent):
         self.optimizer.step()
 
 
-
-DEFAULT_TEST_PATH = 'model3_dict_new.pkl'
+DEFAULT_TEST_PATH = 'model3_dict_01_11.pkl'
 
 
 class TestAgent(Agent):

@@ -152,16 +152,26 @@ class HierarchicalAgent(Agent):
         self.game = game
 
 
+DEFAULT_TEST_PATH0 = 'model3_dict0.pkl'
+DEFAULT_TEST_PATH1 = 'model3_dict1.pkl'
+
+
 class TestAgent(Agent):
     def __init__(self, game, display=None):
         super().__init__(game, display)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.net = nn2048_2().to(self.device)
-        self.net.load_state_dict(torch.load(DEFAULT_TEST_PATH, map_location=self.device))
-        self.net.eval()
+        self.net0 = nn2048_3().to(self.device)
+        self.net1 = nn2048_3().to(self.device)
+        self.net0.load_state_dict(torch.load(DEFAULT_TEST_PATH0, map_location=self.device))
+        self.net0.eval()
+        self.net1.load_state_dict(torch.load(DEFAULT_TEST_PATH1, map_location=self.device))
+        self.net1.eval()
 
     def step(self):
         board = self.game.board
         oh_board = conv_to_onehot(board)
-        direction = self.net.predict(torch.Tensor(oh_board.reshape(1, *oh_board.shape)).to(self.device).float())
+        if self.game.board < 512:
+            direction = self.net0.predict(torch.Tensor(oh_board.reshape(1, *oh_board.shape)).to(self.device).float())
+        else:
+            direction = self.net1.predict(torch.Tensor(oh_board.reshape(1, *oh_board.shape)).to(self.device).float())
         return direction
