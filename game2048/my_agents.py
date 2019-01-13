@@ -1,3 +1,10 @@
+"""
+    author: 赵阳桁
+    TrainAgent use buffer to train
+    TrainAgent2 train without buffer
+    TestAgent is a simple agent for webapp, evaluate and figerprint.
+"""
+
 from .agents import Agent
 from utils import try_to_move, get_train_data, conv_to_onehot, ReplayMemory, Transition, conv_to_onehot_12, get_train_data_12
 import numpy as np
