@@ -22,6 +22,20 @@ def conv_to_onehot(grid):
     return one_hot
 
 
+def conv_to_onehot_12(grid):
+    """
+
+    :param grid: matrix with item equal to 0 or time of 2
+    :return: 16*grid.shape one-hot format 3D matrix
+    """
+    one_hot = np.zeros((12,) + grid.shape)  # , dtype=np.int)
+    one_hot[0, grid == 0] = 1
+    for i in range(1, 12):
+        one_hot[i, grid == 2**i] = 1
+
+    return one_hot
+
+
 def flatten_onehot(one_hot):
     """
 

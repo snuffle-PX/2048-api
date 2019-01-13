@@ -1,12 +1,13 @@
 from .agents import Agent
-from utils import try_to_move, get_train_data, conv_to_onehot, ReplayMemory, Transition
+from utils import try_to_move, get_train_data, conv_to_onehot, ReplayMemory, Transition, conv_to_onehot_12, get_train_data_12
 import numpy as np
 import torch
 import torch.nn
 import torch.nn.functional as F
 import torch.optim
-from model import nn2048, nn2048_2, nn2048_3
+from model import nn2048, nn2048_2, nn2048_3, nn2048_4
 from .expectimax import board_to_move
+import time
 
 
 BATCH_SIZE = 64
@@ -31,10 +32,11 @@ class TrainAgent(Agent):
         self.step_counter = 0
         self.error_counter = 0
         self.diff_counter = 0
+        self.t = 0
         if self.train:
 
             self.teacher = board_to_move
-            
+
             if load_data:
                 if path is None:
                     path = DEFAULT_PATH
@@ -53,7 +55,7 @@ class TrainAgent(Agent):
 
             self.optimizer = torch.optim.Adam(self.net.parameters(), lr=learning_rate)  # configure.learning_rate)
             self.buffer = ReplayMemory(5 * BATCH_SIZE)
-            
+
         else:
             try:
                 if path is None:
@@ -87,6 +89,7 @@ class TrainAgent(Agent):
         self.optimizer.step()
 
     def step(self):
+        start = time.time()
         board = self.game.board
         oh_board = conv_to_onehot(board)
         self.step_counter += 1
@@ -122,7 +125,9 @@ class TrainAgent(Agent):
                 self.diff_counter += 1
                 # direction = board_to_move(board)
                 # print("score -1")
-                
+
+        end = time.time()
+        self.t += start - end
         return direction
 
     def play(self, max_iter=np.inf, verbose=False):
@@ -193,6 +198,111 @@ class RLAgent(Agent):
         self.optimizer.step()
 
 
+class TrainAgent_12(Agent):
+
+    def __init__(self, game, display=None, train=True, load_data=False, path=None):
+        super().__init__(game, display)
+        self.train = train
+        self.statistics = {2 ** i: 0 for i in range(1, 16)}
+        self.threshold = THRESHOLD
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.step_counter = 0
+        self.error_counter = 0
+        self.diff_counter = 0
+        self.t = 0
+        if self.train:
+
+            self.teacher = board_to_move
+
+            if load_data:
+                if path is None:
+                    path = DEFAULT_PATH
+                else:
+                    pass
+                try:
+                    self.net = nn2048_4().to(self.device)
+                    self.net.load_state_dict(torch.load(path, map_location=self.device))
+                except FileNotFoundError:
+                    print('No model loaded! Create new model')
+                    self.net = nn2048_4().to(self.device)
+            else:
+                self.net = nn2048_4().to(self.device)
+
+            self.criterion = torch.nn.CrossEntropyLoss()
+
+            self.optimizer = torch.optim.Adam(self.net.parameters(), lr=learning_rate)  # configure.learning_rate)
+            # self.buffer = ReplayMemory(5 * BATCH_SIZE)
+
+        else:
+            try:
+                if path is None:
+                    path = DEFAULT_PATH
+
+                self.net = nn2048_4().to(self.device)
+                self.net.load_state_dict(torch.load(path, map_location=self.device))
+                self.net.eval()
+            except FileNotFoundError:
+                print('No model loaded!')
+                self.net = nn2048_4().to(self.device)
+
+    def train_net(self, board, target_direction):
+        train_data, train_targets = get_train_data_12(board, target_direction)
+        train_data = torch.Tensor(train_data).to(self.device).float()
+        train_targets = torch.Tensor(train_targets).to(self.device).long().squeeze(1)  #
+
+        y = self.net.forward(train_data)
+        loss = self.criterion(y, train_targets)
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+    def step(self):
+        start = time.time()
+        board = self.game.board
+        oh_board = conv_to_onehot_12(board)
+        self.step_counter += 1
+
+        if self.train:
+            target_direction = self.teacher(board)
+
+            self.train_net(board, target_direction)
+
+            if np.random.rand() > self.threshold or self.game.score < 512:
+                direction = self.net.predict(torch.Tensor(oh_board.reshape(1, *oh_board.shape)).to(self.device).float())
+
+                if direction != target_direction:
+                    self.error_counter += 1
+
+            else:
+                direction = target_direction
+
+        else:
+            """
+                Only test without train
+            """
+            direction = self.net.predict(torch.Tensor(oh_board.reshape(1, *oh_board.shape)).to(self.device).float())
+            _, score = try_to_move(board, direction)
+            if score == -1:  # cannot move to the selected direction
+                self.error_counter += 1
+
+            if direction != board_to_move(board):
+                self.diff_counter += 1
+                # direction = board_to_move(board)
+                # print("score -1")
+
+        end = time.time()
+        self.t += start - end
+        return direction
+
+    def play(self, max_iter=np.inf, verbose=False):
+        super(TrainAgent_12, self).play(max_iter=max_iter, verbose=verbose)
+        self.statistics[self.game.score] += 1
+
+    def new_game(self, game):
+        self.game = game
+
+
 DEFAULT_TEST_PATH = 'model3_dict_01_11.pkl'
 
 
@@ -205,6 +315,7 @@ class TestAgent(Agent):
         self.net.eval()
 
     def step(self):
+
         board = self.game.board
         oh_board = conv_to_onehot(board)
         direction = self.net.predict(torch.Tensor(oh_board.reshape(1, *oh_board.shape)).to(self.device).float())

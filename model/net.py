@@ -159,3 +159,9 @@ class nn2048_3(torch.nn.Module):
             preds = torch.argmax(x, dim=1)
         return preds
 
+
+class nn2048_4(nn2048_3):
+    def __init__(self):
+        super(nn2048_4, self).__init__()
+        self.conv1 = torch.nn.Conv2d(12, 128, kernel_size=(2, 1), padding=0, bias=True)
+        self.conv2 = torch.nn.Conv2d(12, 128, kernel_size=(1, 2), padding=0, bias=True)

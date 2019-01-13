@@ -11,8 +11,8 @@ from .expectimax import board_to_move
 DEFAULT_PATH0 = 'model3_dict0.pkl'
 DEFAULT_PATH1 = 'model3_dict1.pkl'
 BETA = 0.5
-learning_rate = 1e-4
-THRESHOLD = 0.9
+learning_rate = 5e-5
+THRESHOLD = 0.5
 
 
 class HierarchicalAgent(Agent):
@@ -170,7 +170,7 @@ class TestAgent(Agent):
     def step(self):
         board = self.game.board
         oh_board = conv_to_onehot(board)
-        if self.game.board < 512:
+        if self.game.score < 512:
             direction = self.net0.predict(torch.Tensor(oh_board.reshape(1, *oh_board.shape)).to(self.device).float())
         else:
             direction = self.net1.predict(torch.Tensor(oh_board.reshape(1, *oh_board.shape)).to(self.device).float())
