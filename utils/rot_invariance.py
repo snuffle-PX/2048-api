@@ -1,3 +1,7 @@
+"""
+    author: 赵阳桁
+    此文件中通过旋转，对称的方式对每个棋盘生成5个棋盘和响应的方向，作为一个batch交给网络训练
+"""
 import numpy as np
 from .onehot import conv_to_onehot, conv_to_onehot_12
 

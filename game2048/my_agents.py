@@ -11,10 +11,6 @@ import time
 
 
 BATCH_SIZE = 64
-GAMMA = 0.999
-EPS_START = 0.9
-EPS_END = 0.05
-EPS_DECAY = 200
 TARGET_UPDATE = 10
 learning_rate = 1e-4
 THRESHOLD = 0.5
@@ -319,4 +315,5 @@ class TestAgent(Agent):
         board = self.game.board
         oh_board = conv_to_onehot(board)
         direction = self.net.predict(torch.Tensor(oh_board.reshape(1, *oh_board.shape)).to(self.device).float())
+        direction = int(direction.data.numpy())
         return direction

@@ -1,3 +1,7 @@
+"""
+    autor: 赵阳桁
+    生成 onehot 棋盘
+"""
 import numpy as np
 
 

@@ -1,17 +1,22 @@
+"""
+    author: 赵阳桁
+    Trian model from pre-trained model
+
+"""
 from game2048.agents import ExpectiMaxAgent
 from game2048.game import Game
-from game2048.my_agents import TrainAgent
+from game2048.my_agents import TrainAgent, TrainAgent2
 from game2048.displays import Display
 import torch
 
 GAME_SIZE = 4
 SCORE_TO_WIN = 4096
 N_TESTS = 10
-PATH = 'model_dict.pkl'
-SAVE_PATH = 'model_dict_new.pkl'
+PATH = 'model3_dict_01_11.pkl'
+SAVE_PATH = 'model3_dict_new.pkl'
 
 game = Game(GAME_SIZE, SCORE_TO_WIN, random=False)
-agent = TrainAgent(game, display=Display(), load_data=True, path=PATH)
+agent = TrainAgent2(game, display=Display(), load_data=True, path=PATH)
 for i in range(2000):
     agent.play(verbose=False)
     print("Game: {} Score: {}".format(i, agent.game.score))

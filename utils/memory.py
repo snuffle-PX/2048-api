@@ -1,3 +1,7 @@
+"""
+    author: 赵阳桁
+    ReplayMemory 是一个用于缓存的buffer
+"""
 from collections import namedtuple
 import random
 
