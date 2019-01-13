@@ -8,7 +8,7 @@ A 2048 game api for training supervised learning (imitation learning) or reinfor
     * [`displays.py`](game2048/displays.py): the `Display` class with instances, to show the `Game` state.
     * [`expectimax/`](game2048/expectimax): a powerful ExpectiMax agent by [here](https://github.com/nneonneo/2048-ai).
     * [`my_agents.py`](game2048/my_agents.py): several agents I defined, for test, you should use TrainAgent with train.py or use TestAgent with evaluate.py.
-    * [`HierarchicalAgent.py`](game2048/HierarchicalAgent.py): 
+    * [`HierarchicalAgent.py`](game2048/HierarchicalAgent.py):  agent for hierarchical model.
 * [`model/`](model/): the package contains the models I uesd, and the nn2048_3 model is the model works best.
 * [`utils/`](utils/): some function used in this project.
     * [`memory.py`](utils/memory.py): contains a buffer for train.
