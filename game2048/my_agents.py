@@ -11,7 +11,6 @@ import time
 
 
 BATCH_SIZE = 64
-TARGET_UPDATE = 10
 learning_rate = 1e-4
 THRESHOLD = 0.5
 DEFAULT_PATH = 'model_dict.pkl'

@@ -73,6 +73,10 @@ Please read [here](EE369.md).
 
 You should compile expectedMax Agent if you want to use test.py or train.py, to just use evaluate.py, you can comment the line 9  `from .expectimax import board_to_move` in `game2048/my_agent.py`, and comment from line 20 to line 299. 
 
+Some of the hyperparameters were defined in  `game2048/my_agent.py`. Write the path for load and save model in `train.py`.
+
+You can watch the train process through `python -u train.py >> your_log_file` and use `cat your_log_file | grep 'Score: '` to see the score of each game. 
+
 ### Visualize
 
 Requirements: `tensorflow`, ` tensorboardX`
